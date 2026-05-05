@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块 - 排行榜</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .leaderboard-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: var(--spacing-xxxl) var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .leaderboard-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xxl);
+        }
+        
+        .leaderboard-header h1 {
+            font-size: var(--font-size-hero);
+            margin-bottom: var(--spacing-md);
+            background: var(--gradient-title);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: var(--spacing-xl);
+            left: var(--spacing-xl);
+            padding: 10px var(--spacing-xl);
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: var(--border-card);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: var(--font-size-md);
+            font-weight: bold;
+            transition: all var(--transition-normal);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+        
+        .game-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius-xxl);
+            padding: var(--spacing-xxxl);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+            width: 100%;
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xxl);
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            padding: 12px var(--spacing-xxl);
+            background: rgba(255, 255, 255, 0.1);
+            border: var(--border-card);
+            color: var(--text-secondary);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-size: var(--font-size-md);
+            font-weight: bold;
+            transition: all var(--transition-normal);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .mode-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .mode-btn.active {
+            background: var(--gradient-mode-active);
+            color: var(--text-primary);
+            border-color: transparent;
+            box-shadow: var(--shadow-btn);
+        }
+        
+        .difficulty-selector {
+            display: none;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xxl);
+        }
+        
+        .difficulty-selector.active {
+            display: flex;
+        }
+        
+        .difficulty-btn {
+            padding: 10px var(--spacing-xl);
+            background: rgba(255, 255, 255, 0.1);
+            border: var(--border-card);
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all var(--transition-normal);
+        }
+        
+        .difficulty-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .difficulty-btn.active {
+            background: var(--gradient-mode-active);
+            color: var(--text-primary);
+            border-color: transparent;
+        }
+        
+        .difficulty-btn[data-diff="easy"].active {
+            background: var(--gradient-btn-success);
+        }
+        
+        .difficulty-btn[data-diff="hard"].active {
+            background: var(--gradient-btn-danger);
+        }
+        
+        .leaderboard-table-container {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--accent-primary);
+            padding: var(--spacing-lg);
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: var(--border-subtle);
+        }
+        
+        .leaderboard-table td {
+            padding: var(--spacing-lg);
+            border-bottom: var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        
+        .leaderboard-table tr:hover {
+            background: var(--bg-card-hover);
+        }
+        
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .rank-1 {
+            color: var(--accent-gold);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .rank-2 {
+            color: #C0C0C0;
+            font-weight: bold;
+        }
+        
+        .rank-3 {
+            color: #CD7F32;
+            font-weight: bold;
+        }
+        
+        .score-value {
+            color: var(--accent-primary);
+            font-weight: bold;
+            font-size: var(--font-size-xxl);
+        }
+        
+        .player-name {
+            font-weight: 500;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: var(--spacing-xxxl);
+            color: var(--text-muted);
+        }
+        
+        .error {
+            text-align: center;
+            padding: var(--spacing-xxxl);
+            color: var(--accent-danger);
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xxl);
+        }
+        
+        .pagination button {
+            padding: 10px var(--spacing-xl);
+            background: var(--bg-card);
+            border: var(--border-card);
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: var(--font-size-md);
+            font-weight: bold;
+            transition: all var(--transition-normal);
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .pagination button.active {
+            background: var(--gradient-mode-active);
+            border-color: transparent;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xxl);
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            text-shadow: var(--shadow-text-glow);
+        }
+        
+        @media (max-width: 768px) {
+            .leaderboard-container {
+                padding: var(--spacing-xl) 10px;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 10px;
+                font-size: var(--font-size-md);
+            }
+            
+            .mode-btn {
+                padding: 10px 16px;
+                font-size: var(--font-size-sm);
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← 返回大厅</a>
+    
+    <div class="leaderboard-container">
+        <div class="leaderboard-header">
+            <h1>🏆 排行榜</h1>
+        </div>
+        
+        <div class="game-wrapper">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="single">积分赛</button>
+                <button class="mode-btn" data-mode="ai">挑战AI</button>
+                <button class="mode-btn" data-mode="multiplayer">双人对战</button>
+            </div>
+            
+            <div class="difficulty-selector" id="difficulty-selector">
+                <button class="difficulty-btn" data-diff="easy">简单</button>
+                <button class="difficulty-btn active" data-diff="normal">普通</button>
+                <button class="difficulty-btn" data-diff="hard">困难</button>
+            </div>
+            
+            <div class="leaderboard-table-container">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">排名</th>
+                            <th>玩家</th>
+                            <th style="width: 120px;">分数</th>
+                            <th style="width: 100px;">等级</th>
+                            <th style="width: 100px;">消行</th>
+                            <th style="width: 180px;">时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr>
+                            <td colspan="6" class="loading">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 游戏状态和配置
+        const state = {
+            currentMode: 'single',
+            currentDifficulty: 'normal',
+            currentPage: 0,
+            pageSize: 20,
+            totalRecords: 0
+        };
+        
+        // DOM 元素
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const difficultyButtons = document.querySelectorAll('.difficulty-btn');
+        const difficultySelector = document.getElementById('difficulty-selector');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        const pagination = document.getElementById('pagination');
+        
+        // 模式切换
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.currentMode = btn.dataset.mode;
+                state.currentPage = 0;
+                
+                // 显示/隐藏难度选择
+                if (state.currentMode === 'ai') {
+                    difficultySelector.classList.add('active');
+                } else {
+                    difficultySelector.classList.remove('active');
+                }
+                
+                loadLeaderboard();
+            });
+        });
+        
+        // 难度切换
+        difficultyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                difficultyButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.currentDifficulty = btn.dataset.diff;
+                state.currentPage = 0;
+                loadLeaderboard();
+            });
+        });
+        
+        // 加载排行榜
+        async function loadLeaderboard() {
+            leaderboardBody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+            
+            try {
+                let url = `/api/leaderboard?game_mode=${state.currentMode}&limit=${state.pageSize}&offset=${state.currentPage * state.pageSize}`;
+                if (state.currentMode === 'ai') {
+                    url += `&difficulty=${state.currentDifficulty}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('加载失败');
+                
+                const data = await response.json();
+                renderLeaderboard(data);
+                renderPagination();
+            } catch (error) {
+                leaderboardBody.innerHTML = `<tr><td colspan="6" class="error">加载失败: ${error.message}</td></tr>`;
+            }
+        }
+        
+        // 渲染排行榜
+        function renderLeaderboard(data) {
+            if (data.length === 0) {
+                leaderboardBody.innerHTML = '<tr><td colspan="6" class="loading">暂无数据</td></tr>';
+                return;
+            }
+            
+            const startRank = state.currentPage * state.pageSize + 1;
+            
+            leaderboardBody.innerHTML = data.map((record, index) => {
+                const rank = startRank + index;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                const date = new Date(record.timestamp).toLocaleString('zh-CN');
+                
+                return `
+                    <tr>
+                        <td class="${rankClass}">${rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank}</td>
+                        <td class="player-name">${escapeHtml(record.player_name)}</td>
+                        <td class="score-value">${record.score.toLocaleString()}</td>
+                        <td>Lv.${record.level}</td>
+                        <td>${record.lines_cleared}</td>
+                        <td>${date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // 渲染分页
+        function renderPagination() {
+            const totalPages = Math.ceil(state.totalRecords / state.pageSize);
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // 上一页
+            html += `<button ${state.currentPage === 0 ? 'disabled' : ''} onclick="changePage(${state.currentPage - 1})">上一页</button>`;
+            
+            // 页码
+            for (let i = 0; i < totalPages && i < 5; i++) {
+                html += `<button class="${i === state.currentPage ? 'active' : ''}" onclick="changePage(${i})">${i + 1}</button>`;
+            }
+            
+            // 下一页
+            html += `<button ${state.currentPage >= totalPages - 1 ? 'disabled' : ''} onclick="changePage(${state.currentPage + 1})">下一页</button>`;
+            
+            pagination.innerHTML = html;
+        }
+        
+        // 切换页面
+        window.changePage = function(page) {
+            state.currentPage = page;
+            loadLeaderboard();
+        };
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 初始化
+        loadLeaderboard();
+    </script>
+</body>
+</html>

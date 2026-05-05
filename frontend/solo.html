@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块 - 积分赛</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/components/key-config-modal.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .solo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-xxxl) var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: var(--font-size-hero);
+            margin-bottom: var(--spacing-xxl);
+            background: var(--gradient-title);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .game-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius-xxl);
+            padding: var(--spacing-xxxl);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--spacing-xl);
+        }
+        
+        .nickname-section {
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+        
+        .nickname-section input {
+            padding: 12px var(--spacing-xl);
+            font-size: var(--font-size-lg);
+            border: var(--border-card);
+            border-radius: var(--radius-lg);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all var(--transition-normal);
+        }
+        
+        .nickname-section input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-card-hover);
+        }
+        
+        .info-panel {
+            display: flex;
+            gap: var(--spacing-xl);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .info-box {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            padding: var(--spacing-lg) var(--spacing-xxl);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            min-width: 100px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .info-box h4 {
+            margin: 0 0 5px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            text-shadow: var(--shadow-text-glow);
+        }
+        
+        .info-box:nth-child(2) .value {
+            color: var(--accent-secondary);
+            text-shadow: 0 0 10px rgba(123, 44, 191, 0.5);
+        }
+        
+        .info-box:nth-child(3) .value {
+            color: var(--accent-tertiary);
+            text-shadow: 0 0 10px rgba(255, 0, 110, 0.5);
+        }
+        
+        .game-area {
+            display: flex;
+            gap: var(--spacing-xl);
+            align-items: flex-start;
+        }
+        
+        .board-section {
+            position: relative;
+        }
+        
+        #game-canvas {
+            border: var(--border-card);
+            border-radius: var(--radius-lg);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+        
+        .next-piece-box {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-xl);
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .next-piece-box h4 {
+            margin: 0 0 10px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #next-canvas {
+            border: var(--border-subtle);
+            border-radius: var(--radius-md);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .btn {
+            padding: 12px var(--spacing-xxl);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-md);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-start {
+            background: var(--gradient-mode-active);
+            color: var(--text-primary);
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-btn);
+        }
+        
+        .btn-start:disabled {
+            background: linear-gradient(135deg, #555 0%, #333 100%);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: var(--border-card);
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-back:hover {
+            background: var(--bg-card-hover);
+        }
+        
+        .btn-settings {
+            background: rgba(100, 100, 100, 0.3);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+        }
+        
+        .btn-settings:hover {
+            background: rgba(100, 100, 100, 0.5);
+        }
+        
+        .instructions {
+            background: var(--bg-card);
+            border: var(--border-subtle);
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(5px);
+        }
+        
+        .instructions h4 {
+            margin: 0 0 15px 0;
+            color: var(--accent-primary);
+            font-size: var(--font-size-md);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .instructions ul {
+            margin: 0;
+            padding-left: var(--spacing-xl);
+            color: var(--text-secondary);
+            font-size: 13px;
+            list-style: none;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            position: relative;
+        }
+        
+        .instructions li::before {
+            content: '▸';
+            position: absolute;
+            left: -15px;
+            color: var(--accent-primary);
+        }
+        
+        .instructions strong, .instructions .key {
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        
+        /* 游戏结束遮罩 */
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+        }
+        
+        .game-over-overlay.hidden {
+            display: none;
+        }
+        
+        .game-over-overlay h2 {
+            color: var(--accent-tertiary);
+            font-size: 36px;
+            margin-bottom: var(--spacing-xl);
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+        
+        .final-score {
+            font-size: 56px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+        
+        .high-score {
+            color: var(--accent-gold);
+            margin-bottom: 25px;
+            font-size: var(--font-size-lg);
+        }
+        
+        .submit-score-section {
+            margin-top: var(--spacing-lg);
+            text-align: center;
+        }
+        
+        .btn-submit {
+            background: var(--gradient-winner);
+            color: var(--text-dark);
+            border: none;
+            padding: 12px 30px;
+            font-size: var(--font-size-md);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-weight: bold;
+        }
+        
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+        }
+        
+        .btn-submit:disabled {
+            background: #555;
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .submitted-message {
+            color: var(--accent-primary);
+            margin-top: var(--spacing-md);
+            font-weight: bold;
+            text-shadow: var(--shadow-text-glow);
+        }
+        
+        .submitted-message.hidden {
+            display: none;
+        }
+        
+        /* 暂停提示 */
+        .pause-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 700px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .side-panel {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="solo-container">
+        <h1>🎮 俄罗斯方块 - 积分赛</h1>
+        
+        <div class="game-wrapper">
+            <div class="nickname-section">
+                <input type="text" id="nickname-input" placeholder="输入昵称" maxlength="12" value="玩家">
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-box">
+                    <h4>分数</h4>
+                    <div class="value" id="score">0</div>
+                </div>
+                <div class="info-box">
+                    <h4>等级</h4>
+                    <div class="value" id="level">1</div>
+                </div>
+                <div class="info-box">
+                    <h4>消除行数</h4>
+                    <div class="value" id="lines">0</div>
+                </div>
+            </div>
+            
+            <div class="game-area">
+                <div class="board-section">
+                    <canvas id="game-canvas" width="300" height="600"></canvas>
+                    <div id="game-over-overlay" class="game-over-overlay hidden">
+                        <h2>GAME OVER</h2>
+                        <div class="final-score" id="final-score">0</div>
+                        <div class="high-score" id="high-score"></div>
+                        <button class="btn btn-start" id="btn-restart">再来一局</button>
+                        <div class="submit-score-section">
+                            <button class="btn-submit" id="btn-submit-score">提交到排行榜</button>
+                            <div id="submitted-message" class="submitted-message hidden">✓ 已提交到排行榜!</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="side-panel">
+                    <div class="next-piece-box">
+                        <h4>下一个</h4>
+                        <canvas id="next-canvas" width="120" height="120"></canvas>
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="btn btn-start" id="btn-start">开始游戏</button>
+                        <button class="btn btn-settings" id="btn-key-settings">⚙️ 按键设置</button>
+                        <a href="/" class="btn btn-back">← 返回大厅</a>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h4>操作说明</h4>
+                        <ul>
+                            <li><strong>← →</strong> 左右移动</li>
+                            <li><strong>↑</strong> 旋转方块</li>
+                            <li><strong>↓</strong> 加速下降</li>
+                            <li><strong>空格</strong> 直接落地</li>
+                            <li><strong>P</strong> 暂停/继续</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/config.global.js"></script>
+    <script src="/static/js/core/KeyConfigManager.global.js"></script>
+    <script src="/static/js/solo.js"></script>
+</body>
+</html>

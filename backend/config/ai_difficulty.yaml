@@ -1,0 +1,30 @@
+# AI 难度配置
+# 定义不同难度等级的参数
+
+difficulties:
+  easy:
+    name: "简单"
+    move_delay: 1.0              # 移动延迟（秒）
+    mistake_rate: 0.3            # 失误率（0-1）
+    description: "AI随机落子，移动缓慢，适合新手练习"
+    evaluator_depth: 1           # 评估深度
+    top_placements: 3            # 从前N个位置随机选择
+    weights_override: {}         # 权重覆盖（空表示使用默认）
+  
+  normal:
+    name: "普通"
+    move_delay: 0.5
+    mistake_rate: 0.1
+    description: "AI会评估位置，偶尔失误，适合普通玩家"
+    evaluator_depth: 1
+    top_placements: 1
+    weights_override: {}
+  
+  hard:
+    name: "困难"
+    move_delay: 0.2
+    mistake_rate: 0.0
+    description: "AI采用最优策略，反应迅速，挑战性极高"
+    evaluator_depth: 2           # 预测下一个方块
+    top_placements: 1
+    weights_override: {}

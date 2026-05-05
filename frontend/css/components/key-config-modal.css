@@ -1,0 +1,180 @@
+/**
+ * 按键设置弹窗组件样式
+ * 用于 solo.html, single.html, index.html 的按键设置功能
+ */
+
+/* 弹窗遮罩 */
+.key-config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.key-config-modal.hidden {
+    display: none;
+}
+
+/* 弹窗内容 */
+.key-config-content {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: var(--radius-xl, 16px);
+    padding: 32px;
+    min-width: 320px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.key-config-content h3 {
+    text-align: center;
+    margin-bottom: 24px;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+/* 配置列表 */
+.key-config-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.key-config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.key-config-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.key-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+/* 按键值按钮 */
+.key-value {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 80px;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.key-value:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #00d4ff;
+    transform: translateY(-1px);
+}
+
+.key-value.binding {
+    background: #00d4ff;
+    color: #000;
+    animation: keyBindingPulse 1s infinite;
+    border-color: #00d4ff;
+}
+
+@keyframes keyBindingPulse {
+    0%, 100% { 
+        opacity: 1; 
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    50% { 
+        opacity: 0.7; 
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+    }
+}
+
+/* 状态提示 */
+.key-config-status {
+    text-align: center;
+    padding: 12px;
+    background: rgba(255, 193, 7, 0.15);
+    border-radius: 8px;
+    color: #ffc107;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.key-config-status.hidden {
+    display: none;
+}
+
+/* 按钮区域 */
+.key-config-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.key-config-buttons .btn {
+    flex: 1;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.key-config-buttons .btn-primary {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: #fff;
+}
+
+.key-config-buttons .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+}
+
+.key-config-buttons .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.key-config-buttons .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 响应式适配 */
+@media (max-width: 480px) {
+    .key-config-content {
+        min-width: 280px;
+        padding: 24px;
+        margin: 20px;
+    }
+    
+    .key-config-item {
+        padding: 8px 12px;
+    }
+    
+    .key-value {
+        min-width: 60px;
+        padding: 6px 12px;
+    }
+}

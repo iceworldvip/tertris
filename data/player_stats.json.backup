@@ -1,0 +1,16 @@
+{
+  "测试玩家": {
+    "player_name": "测试玩家",
+    "total_games": 1,
+    "total_score": 5000,
+    "highest_score": 5000,
+    "total_play_time": 120,
+    "wins": 0,
+    "best_single_score": 5000,
+    "best_ai_scores": {
+      "easy": 0,
+      "normal": 0,
+      "hard": 0
+    }
+  }
+}

@@ -1,0 +1,35 @@
+# 道具系统配置
+# 定义道具类型、描述、目标类型和效果参数
+
+items:
+  add_garbage:
+    name: "垃圾行"
+    description: "给对手添加垃圾行"
+    target_type: "opponent"
+    effect:
+      type: "add_garbage"
+      lines: 1  # 添加的垃圾行数
+    icon: "🗑️"
+    
+  clear_line:
+    name: "消行"
+    description: "消除自己底部一行"
+    target_type: "self"
+    effect:
+      type: "clear_line"
+      lines: 1  # 消除的行数
+    icon: "✨"
+
+# 道具触发配置
+item_trigger:
+  lines_required: 5  # 每消除多少行获得一个道具
+  max_items: 3       # 最大持有道具数量
+
+# 道具效果消息模板
+message_templates:
+  add_garbage:
+    success: "{user} 对 {target} 使用了垃圾行道具！"
+    self: "你给自己添加了垃圾行！"
+  clear_line:
+    success: "{user} 使用了消行道具！"
+    fail: "消行失败，没有可消除的行"

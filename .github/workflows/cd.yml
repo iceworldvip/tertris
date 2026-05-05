@@ -1,0 +1,66 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -e ".[all]"
+
+    - name: Run tests
+      run: |
+        pytest backend/tests/unit -v --tb=short
+
+    - name: Build executable
+      run: |
+        cd backend
+        pip install pyinstaller
+        # pyinstaller --onefile main.py
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+        body: |
+          ## 更新内容
+          - 后端 API 优化
+          - 新增房间模式支持
+          - 新增 AI 对战功能
+          - 新增排行榜系统
+          - 全面的单元测试覆盖
+
+          ## 安装说明
+          1. 安装 Python 3.10+
+          2. 安装依赖：`pip install -e ".[all]"`
+          3. 启动服务：`python run_server.py`
+
+          ## 文档
+          - API 文档：`http://localhost:8000/docs`
+          - 前端游戏：`http://localhost:8000/`
+
+          ## 测试覆盖率
+          - 游戏核心逻辑测试
+          - 方块旋转测试
+          - 碰撞检测测试
+          - 消行逻辑测试
+          - AI 评估器测试
+          - 房间管理测试

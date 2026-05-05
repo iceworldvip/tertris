@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>俄罗斯方块 - 双人对战</title>
+        <link rel="stylesheet" href="/static/css/style.css" />
+        <link
+            rel="stylesheet"
+            href="/static/css/components/key-config-modal.css"
+        />
+    </head>
+    <body>
+        <!-- 登录/房间选择界面 -->
+        <div id="lobby-screen" class="screen active">
+            <div class="lobby-container">
+                <h1>🎮 俄罗斯方块对战</h1>
+
+                <div class="nickname-section">
+                    <label for="nickname">你的昵称：</label>
+                    <input
+                        type="text"
+                        id="nickname"
+                        placeholder="输入昵称"
+                        maxlength="20"
+                        value="玩家"
+                    />
+                </div>
+
+                <div class="room-actions">
+                    <button id="btn-create-room" class="btn btn-primary">
+                        创建房间
+                    </button>
+                    <div class="join-room-section">
+                        <input
+                            type="text"
+                            id="room-id-input"
+                            placeholder="输入房间号"
+                            maxlength="6"
+                        />
+                        <button id="btn-join-room" class="btn btn-secondary">
+                            加入房间
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    class="single-player-section"
+                    style="
+                        margin-top: 20px;
+                        padding-top: 20px;
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    "
+                >
+                    <h3>单人模式</h3>
+                    <div
+                        style="
+                            display: flex;
+                            justify-content: center;
+                            gap: 10px;
+                            flex-wrap: wrap;
+                        "
+                    >
+                        <a href="/solo" class="btn-mode btn-mode-solo">
+                            🎮 积分赛
+                        </a>
+                        <a href="/single" class="btn-mode btn-mode-ai">
+                            🤖 挑战AI
+                        </a>
+                        <a href="/leaderboard" class="btn-mode btn-mode-rank">
+                            🏆 排行榜
+                        </a>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 12px; color: #888">
+                        积分赛：独自挑战高分 | AI对战：与电脑对战 | 查看全服排名
+                    </p>
+                </div>
+
+                <div class="room-list-section">
+                    <h3>可用房间</h3>
+                    <div id="room-list" class="room-list">
+                        <p class="empty">暂无房间，创建一个吧！</p>
+                    </div>
+                    <button id="btn-refresh-rooms" class="btn btn-small">
+                        刷新列表
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <h1>俄罗斯方块对战</h1>
+                <div class="room-info">
+                    <span>房间号: <strong id="display-room-id">-</strong></span>
+                    <button
+                        id="btn-leave-room"
+                        class="btn btn-small btn-danger"
+                    >
+                        离开
+                    </button>
+                </div>
+            </div>
+
+            <div class="game-layout">
+                <!-- 玩家1区域 -->
+                <div class="player-area" id="player1-area">
+                    <div class="player-header">
+                        <span class="player-name" id="player1-name"
+                            >等待玩家...</span
+                        >
+                        <span class="player-status" id="player1-status"
+                            >等待中</span
+                        >
+                    </div>
+                    <div class="game-board-wrapper">
+                        <canvas
+                            id="player1-board"
+                            width="300"
+                            height="600"
+                        ></canvas>
+                        <div id="player1-overlay" class="overlay hidden">
+                            <div class="overlay-content">
+                                <h2 id="player1-overlay-title">准备</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-info">
+                        <div class="info-item">
+                            <span class="label">分数</span>
+                            <span id="player1-score" class="value">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">行数</span>
+                            <span id="player1-lines" class="value">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">等级</span>
+                            <span id="player1-level" class="value">1</span>
+                        </div>
+                        <div
+                            class="info-item ready-status hidden"
+                            id="player1-ready-status"
+                        >
+                            <span class="label">准备</span>
+                            <span class="value ready-icon">✓</span>
+                        </div>
+                        <div class="info-item pause-count">
+                            <span class="label">暂停</span>
+                            <span id="player1-pauses" class="value">3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中间区域：对战信息和聊天 -->
+                <div class="center-area">
+                    <div class="vs-section">
+                        <div class="vs-text">VS</div>
+                        <div
+                            id="winner-display"
+                            class="winner-display hidden"
+                        ></div>
+                    </div>
+
+                    <!-- 下一个方块预览 -->
+                    <div class="preview-box">
+                        <h4>下一个</h4>
+                        <canvas
+                            id="next-piece"
+                            width="120"
+                            height="120"
+                        ></canvas>
+                    </div>
+
+                    <!-- 道具栏 -->
+                    <div class="items-box" id="items-container">
+                        <h4>🎁 道具栏</h4>
+                        <div class="items-progress">
+                            <div class="progress-bar">
+                                <div
+                                    class="progress-fill"
+                                    id="item-progress"
+                                ></div>
+                            </div>
+                            <span class="progress-text"
+                                ><span id="lines-progress">0</span>/<span
+                                    id="lines-total"
+                                    >5</span
+                                >行</span
+                            >
+                        </div>
+                        <div class="items-list" id="items-list">
+                            <p class="empty-items">消除5行获得道具</p>
+                        </div>
+                    </div>
+
+                    <!-- 道具目标选择弹窗 -->
+                    <div id="item-target-modal" class="item-modal hidden">
+                        <div class="item-modal-content">
+                            <h4>选择目标</h4>
+                            <p id="item-modal-desc">选择道具使用目标</p>
+                            <div class="item-target-buttons">
+                                <button
+                                    id="btn-target-self"
+                                    class="btn btn-secondary"
+                                >
+                                    对自己使用
+                                </button>
+                                <button
+                                    id="btn-target-opponent"
+                                    class="btn btn-primary"
+                                >
+                                    对对手使用
+                                </button>
+                            </div>
+                            <button id="btn-cancel-item" class="btn btn-small">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 游戏控制 -->
+                    <div class="game-controls">
+                        <button id="btn-start-game" class="btn btn-primary">
+                            开始游戏
+                        </button>
+                        <button id="btn-pause-game" class="btn btn-secondary">
+                            暂停
+                        </button>
+                        <button id="btn-reset-game" class="btn btn-secondary">
+                            重置
+                        </button>
+                    </div>
+
+                    <!-- 聊天窗口 -->
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <span>💬 聊天室</span>
+                            <span id="spectator-count">观战: 0人</span>
+                        </div>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input-area">
+                            <input
+                                type="text"
+                                id="chat-input"
+                                placeholder="输入消息..."
+                                maxlength="100"
+                            />
+                            <button id="btn-send-chat" class="btn btn-small">
+                                发送
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 操作说明 -->
+                    <div class="instructions">
+                        <h4>操作说明</h4>
+                        <ul>
+                            <li>
+                                <span class="key">←</span>
+                                <span class="key">→</span> 左右移动
+                            </li>
+                            <li><span class="key">↑</span> 旋转</li>
+                            <li><span class="key">↓</span> 加速下落</li>
+                            <li><span class="key">空格</span> 直接落下</li>
+                            <li><span class="key">P</span> 暂停</li>
+                        </ul>
+                        <h4>道具说明</h4>
+                        <ul class="item-help">
+                            <li>
+                                <span class="item-icon">🗑️</span> 垃圾行 -
+                                给对手加1-3行
+                            </li>
+                            <li>
+                                <span class="item-icon">✨</span> 清行 -
+                                自己消1-2行
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div id="connection-status" class="connection-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">连接中...</span>
+                    </div>
+                </div>
+
+                <!-- 玩家2区域 -->
+                <div class="player-area" id="player2-area">
+                    <div class="player-header">
+                        <span class="player-name" id="player2-name"
+                            >等待玩家...</span
+                        >
+                        <span class="player-status" id="player2-status"
+                            >等待中</span
+                        >
+                    </div>
+                    <div class="game-board-wrapper">
+                        <canvas
+                            id="player2-board"
+                            width="300"
+                            height="600"
+                        ></canvas>
+                        <div id="player2-overlay" class="overlay hidden">
+                            <div class="overlay-content">
+                                <h2 id="player2-overlay-title">准备</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-info">
+                        <div class="info-item">
+                            <span class="label">分数</span>
+                            <span id="player2-score" class="value">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">行数</span>
+                            <span id="player2-lines" class="value">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">等级</span>
+                            <span id="player2-level" class="value">1</span>
+                        </div>
+                        <div
+                            class="info-item ready-status hidden"
+                            id="player2-ready-status"
+                        >
+                            <span class="label">准备</span>
+                            <span class="value ready-icon">✓</span>
+                        </div>
+                        <div class="info-item pause-count">
+                            <span class="label">暂停</span>
+                            <span id="player2-pauses" class="value">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="/static/js/config.global.js"></script>
+        <script src="/static/js/core/KeyConfigManager.global.js"></script>
+        <script src="/static/js/tetris.js"></script>
+    </body>
+</html>

@@ -1,0 +1,110 @@
+# Tetris Multiplayer - pyproject.toml
+# Python packaging configuration following PEP 621
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tertris"
+version = "2.0.0"
+description = "A real-time multiplayer Tetris game with AI opponents, built with FastAPI"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Tetris Team"}
+]
+keywords = ["tetris", "game", "multiplayer", "websocket", "fastapi", "ai"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: FastAPI",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: Arcade Games",
+]
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.5.0",
+    "websockets>=12.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.0",
+]
+legacy = [
+    "pygame>=2.5.0",
+    "windows-curses; platform_system=='Windows'",
+]
+all = [
+    "tertris[dev,legacy]",
+]
+
+[project.scripts]
+tertris-server = "backend.main:main"
+
+[project.urls]
+Homepage = "https://github.com/your-repo/tertris"
+Documentation = "https://github.com/your-repo/tertris#readme"
+Repository = "https://github.com/your-repo/tertris"
+Issues = "https://github.com/your-repo/tertris/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+include = "\\.pyi?$"
+exclude = """
+/(
+    \\.git
+    | \\.venv
+    | \\.eggs
+    | \\.hg
+    | \\.mypy_cache
+    | \\.tox
+    | \\.build
+    | dist
+    | __pycache__
+)/
+"""
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "W", "I", "N", "D", "UP", "B", "C4", "PT"]
+ignore = ["D100", "D104", "E501"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = [".venv", "build", "dist"]
