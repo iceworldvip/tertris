@@ -1,135 +1,95 @@
-# 俄罗斯方块游戏项目
+# Tertris - 俄罗斯方块在线对战
 
-完整的多平台俄罗斯方块游戏，包含Web版（FastAPI + HTML5 Canvas）、Android App（Jetpack Compose）以及独立运行的Python版本。
+基于 FastAPI + WebSocket 的实时俄罗斯方块对战游戏，支持单人对战、AI 对战和多人匹配对战。
+
+## 功能特性
+
+### 🎮 游戏模式
+- **Solo 模式** - 单人积分赛，挑战高分
+- **AI 对战** - 与三个难度等级的 AI 对战（简单/普通/困难）
+- **多人对战** - 创建房间与好友实时对战
+
+### ⚡ 技术特性
+- 实时 WebSocket 通信
+- 自动匹配系统
+- 道具系统（垃圾行、消除行）
+- 排行榜系统
+- 完整的单元测试覆盖（220+ 测试）
+- UI 自动化测试（Playwright）
+
+## 快速开始
+
+### 安装依赖
+
+```bash
+pip install -e ".[dev]"
+```
+
+### 启动服务
+
+```bash
+cd backend
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 访问游戏
+
+- 主对战页面: http://localhost:8000/
+- 单人模式: http://localhost:8000/solo
+- AI 对战: http://localhost:8000/single
+- 排行榜: http://localhost:8000/leaderboard
+- API 文档: http://localhost:8000/docs
 
 ## 项目结构
 
 ```
-.
+tertris/
 ├── backend/                    # FastAPI 后端
-│   ├── main.py                 # 主程序
-│   ├── requirements.txt        # 依赖
-│   ├── __init__.py
-│   ├── legacy/                 # 独立运行版本
-│   │   ├── tetris_curses.py    # Curses终端版
-│   │   ├── tetris_pygame.py    # Pygame图形版
-│   │   ├── tetris_console.py   # Windows控制台版
-│   │   └── __init__.py
-│   └── tests/                  # 测试脚本
-│       ├── test_api.py         # API测试
-│       ├── test_clear_lines.py # 消行测试
-│       └── __init__.py
-├── frontend/                   # Web前端
-│   ├── index.html              # 主页面
-│   ├── css/
-│   │   └── style.css           # 样式
-│   └── js/
-│       └── tetris.js           # 游戏逻辑
-├── android/                    # Android项目
-│   ├── app/
-│   │   └── src/main/java/com/tetris/android/
-│   │       ├── MainActivity.kt
-│   │       ├── model/
-│   │       ├── network/
-│   │       ├── ui/
-│   │       └── viewmodel/
-│   └── ...
-├── run_server.py               # 后端启动脚本
-└── README.md
+│   ├── main.py                 # 主程序入口
+│   ├── config.py              # 配置常量
+│   ├── models/                 # 数据模型
+│   │   ├── game.py            # 游戏核心逻辑
+│   │   ├── tetromino.py        # 方块定义
+│   │   ├── room.py             # 对战房间
+│   │   ├── ai_room.py          # AI 房间
+│   │   ├── ai_player.py        # AI 玩家
+│   │   ├── items.py            # 道具系统
+│   │   └── leaderboard.py      # 排行榜
+│   ├── handlers/               # 请求处理器
+│   │   ├── websocket.py        # WebSocket 处理器
+│   │   └── ai_websocket.py    # AI 对战处理器
+│   ├── utils/                 # 工具函数
+│   ├── tests/                 # 测试
+│   │   ├── unit/              # 单元测试
+│   │   │   ├── test_game.py
+│   │   │   ├── test_tetromino.py
+│   │   │   ├── test_room.py
+│   │   │   ├── test_ai_player.py
+│   │   │   ├── test_ai_room.py
+│   │   │   └── test_items.py
+│   │   └── test_ui_automation.py  # UI 自动化测试
+│   └── legacy/                # 独立运行版本
+│       ├── tetris_pygame.py   # Pygame 图形版
+│       ├── tetris_curses.py    # Curses 终端版
+│       └── tetris_console.py   # 控制台版
+├── frontend/                   # Web 前端
+│   ├── index.html            # 主对战页面
+│   ├── solo.html             # 单人模式
+│   ├── single.html           # AI 对战页面
+│   ├── leaderboard.html      # 排行榜页面
+│   ├── css/                  # 样式文件
+│   └── js/                   # 游戏逻辑
+│       ├── solo.js           # 单人游戏逻辑
+│       ├── tetris.js         # 对战游戏逻辑
+│       └── ai-game.js        # AI 对战逻辑
+├── .github/workflows/         # CI/CD 配置
+│   ├── ci.yml               # 持续集成
+│   └── cd.yml               # 持续部署
+├── pyproject.toml            # Python 项目配置
+└── LICENSE                  # MIT 许可证
 ```
 
-## 快速开始
-
-### Web 版
-
-1. 安装依赖
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-2. 启动服务
-```bash
-cd ..
-python run_server.py
-```
-
-3. 访问游戏
-打开浏览器: http://localhost:8000
-
-### Android 版
-
-1. 打开 Android Studio
-2. 导入 `android` 目录
-3. 配置模拟器或真机
-4. 点击运行
-
-### 独立运行版本
-
-```bash
-# Pygame 版（需安装 pygame）
-cd backend/legacy
-python tetris_pygame.py
-
-# Curses 终端版（Windows需安装 windows-curses）
-python tetris_curses.py
-
-# Windows 控制台版
-python tetris_console.py
-```
-
-## 功能特性
-
-### 后端 (FastAPI)
-- ✅ RESTful API 创建/控制游戏
-- ✅ WebSocket 实时状态同步
-- ✅ 7种经典方块形状
-- ✅ 方块旋转与碰撞检测
-- ✅ 消行计分系统
-- ✅ 等级系统（速度递增）
-- ✅ 自动下落
-- ✅ 多游戏会话支持
-
-### 前端 (HTML5)
-- ✅ Canvas 渲染游戏画面
-- ✅ WebSocket 实时通信
-- ✅ 键盘控制（方向键 + 空格）
-- ✅ 下一个方块预览
-- ✅ 分数/行数/等级显示
-- ✅ 暂停/继续功能
-- ✅ 响应式设计
-
-### Android
-- ✅ Jetpack Compose UI
-- ✅ 实时WebSocket同步
-- ✅ 触摸控制
-- ✅ Material Design 3
-
-## API 接口
-
-### REST API
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/games` | 创建新游戏 |
-| GET | `/api/games/{game_id}` | 获取游戏状态 |
-| POST | `/api/games/{game_id}/action` | 执行动作 |
-| DELETE | `/api/games/{game_id}` | 删除游戏 |
-
-### WebSocket
-
-连接: `ws://localhost:8000/ws/{game_id}`
-
-消息格式:
-```json
-// 客户端发送
-{"action": "move_left"}  // move_left, move_right, move_down, rotate, hard_drop, pause, reset
-
-// 服务器返回
-{"type": "state_update", "data": {...}}
-```
-
-## 操作说明
+## 游戏操作
 
 | 按键 | 功能 |
 |------|------|
@@ -137,39 +97,79 @@ python tetris_console.py
 | → | 右移 |
 | ↑ | 旋转 |
 | ↓ | 加速下落 |
-| 空格 | 直接落下 |
+| 空格 | 直接落下（硬降） |
 | P | 暂停/继续 |
+
+## API 接口
+
+### REST API
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/rooms` | 获取房间列表 |
+| POST | `/api/rooms` | 创建对战房间 |
+| GET | `/api/rooms/{room_id}` | 获取房间详情 |
+| POST | `/api/ai/rooms` | 创建 AI 对战房间 |
+| GET | `/api/ai/rooms` | 获取 AI 房间列表 |
+| POST | `/api/leaderboard/submit` | 提交分数 |
+| GET | `/api/leaderboard` | 获取排行榜 |
+
+### WebSocket
+
+- 对战房间: `ws://localhost:8000/ws/room/{room_id}`
+- AI 房间: `ws://localhost:8000/ws/ai/{room_id}`
 
 ## 开发
 
 ### 运行测试
 
 ```bash
-# API测试
-python backend/tests/test_api.py
+# 单元测试
+pytest backend/tests/unit -v
 
-# 消行功能测试
-python backend/tests/test_clear_lines.py
+# UI 自动化测试
+python backend/tests/test_ui_automation.py
 ```
 
-### 代码格式化
+### 代码质量
 
 ```bash
+# 代码格式化
 black backend/
+
+# 类型检查
+mypy backend/
+
+# 代码检查
+ruff check backend/
 ```
 
-## 依赖说明
+## 测试覆盖
 
-### 必需依赖
-- `fastapi>=0.104.0` - Web框架
-- `uvicorn[standard]>=0.24.0` - ASGI服务器
-- `pydantic>=2.5.0` - 数据验证
-- `websockets>=12.0` - WebSocket支持
+- ✅ 游戏核心逻辑（碰撞检测、消行、计分）
+- ✅ 7 种方块形状及旋转
+- ✅ AI 玩家（Pierre Dellacherie 算法）
+- ✅ 多人房间系统
+- ✅ 道具系统
+- ✅ UI 自动化测试
 
-### 可选依赖
-- `pygame>=2.5.0` - Pygame版本
-- `curses-windows` - Windows终端版本
+## 技术栈
+
+**后端:**
+- FastAPI - Web 框架
+- WebSocket - 实时通信
+- Pydantic - 数据验证
+- SQLite - 数据持久化
+
+**前端:**
+- HTML5 Canvas - 游戏渲染
+- 原生 JavaScript - 游戏逻辑
+- CSS3 - 样式设计
+
+**测试:**
+- Pytest - 单元测试
+- Playwright - UI 自动化测试
 
 ## 许可证
 
-MIT License
+MIT License - 详见 [LICENSE](LICENSE) 文件
