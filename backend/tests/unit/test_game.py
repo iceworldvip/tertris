@@ -159,7 +159,9 @@ class TestPieceRotation:
         return TetrisGame("test_player")
 
     def test_rotate_changes_shape(self, game):
-        """Test that rotation produces a different shape."""
+        """Test that rotation produces a different shape for non-O pieces."""
+        game.current_piece.shape_index = 2
+        game.current_piece.shape = [[0, 1, 0], [1, 1, 1]]
         initial_shape = [row[:] for row in game.current_piece.shape]
         result = game.rotate_piece()
 
